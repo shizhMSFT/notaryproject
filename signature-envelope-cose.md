@@ -59,11 +59,11 @@ Example with Signing Scheme `notary.x509`
   / crit / 2: [
     'io.cncf.notary.signingScheme',
     'io.cncf.notary.expiry'
-  ]
+  ],
   / cty / 3: 'application/vnd.cncf.notary.payload.v1+json',
   'io.cncf.notary.signingScheme': 'notary.x509',
   'io.cncf.notary.signingTime': 1234567890,
-  'io.cncf.notary.expiry': 1234567891,
+  'io.cncf.notary.expiry': 1234567891
 }
 ```
 
@@ -72,15 +72,15 @@ Example with Signing Scheme `notary.x509.signingAuthority`
 ```yaml
 {
   / alg / 1: / PS384 / -38,
-  / cty / 3: 'application/vnd.cncf.notary.payload.v1+json',
-  'io.cncf.notary.signingScheme': 'notary.x509.signingAuthority',
-  'io.cncf.notary.authenticSigningTime': 1234567890,
-  'io.cncf.notary.expiry': 1234567891,
   / crit / 2: [
     'io.cncf.notary.signingScheme',
     'io.cncf.notary.authenticSigningTime',
     'io.cncf.notary.expiry'
-  ]
+  ],
+  / cty / 3: 'application/vnd.cncf.notary.payload.v1+json',
+  'io.cncf.notary.signingScheme': 'notary.x509.signingAuthority',
+  'io.cncf.notary.authenticSigningTime': 1234567890,
+  'io.cncf.notary.expiry': 1234567891
 }
 ```
 
@@ -151,15 +151,15 @@ The final signature envelope is a `COSE_Sign1_Tagged` object, consisting of Payl
   [
     / protected / << {
       / alg / 1: / PS384 / -38,
-      / cty / 3: 'application/vnd.cncf.notary.payload.v1+json',
-      'io.cncf.notary.signingScheme': 'notary.x509.signingAuthority',
-      'io.cncf.notary.authenticSigningTime': 1234567890,
-      'io.cncf.notary.expiry': 1234567891,
       / crit / 2: [
         'io.cncf.notary.signingScheme',
         'io.cncf.notary.authenticSigningTime',
         'io.cncf.notary.expiry'
-      ]
+      ],
+      / cty / 3: 'application/vnd.cncf.notary.payload.v1+json',
+      'io.cncf.notary.signingScheme': 'notary.x509.signingAuthority',
+      'io.cncf.notary.authenticSigningTime': 1234567890,
+      'io.cncf.notary.expiry': 1234567891
     } >>,
     / unprotected / {
       / x5chain / 33: [
