@@ -342,13 +342,16 @@ This interface targets plugins that in addition to signature generation want to 
 1. Determine if the registered key uses a plugin
 1. Execute the plugin with `get-plugin-metadata` command
     1. If plugin supports capability `SIGNATURE_GENERATOR.ENVELOPE`
-        1. Execute the plugin with `generate-envelope` command. Set `request.keyId` and the optional `request.pluginConfig` to corresponding values associated with signing key `keyName` in `config.json`. Set `request.payload` to base64 encoded [Notary v2 Payload](../signature-specification.md#payload), `request.payloadType` to `application/vnd.cncf.notary.payload.v1+json` and `request.signatureEnvelopeType` to a pre-defined type (`application/vnd.cncf.notary.v2.jws.v1` for JWS).
+        1. Execute the plugin with `generate-envelope` command. Set `request.keyId` and the optional `request.pluginConfig` to corresponding values associated with signing key `keyName` in `config.json`. Set `request.payload` to base64 encoded [Notary v2 Payload](../signature-specification.md#payload), `request.payloadType` to `application/vnd.cncf.notary.payload.v1+json` and `request.signatureEnvelopeType` to a pre-defined type.
+            * Pre-defined types for `request.signatureEnvelopeType`:
+                * JWS: `application/vnd.cncf.notary.v2.jws.v1`
+                * COSE: `application/vnd.cncf.notary.v2.cose.v1`
         2. `response.signatureEnvelope` contains the base64 encoded signature envelope, value of `response.signatureEnvelopeType` MUST match `request.signatureEnvelopeType`.
         3. Validate the generated signature, return an error if of the checks fails.
            1. Check if `response.signatureEnvelopeType` is a supported envelope type and `response.signatureEnvelope`'s format matches `response.signatureEnvelopeType`.
            2. Check if the signing algorithm in the signature envelope is one of [supported signing algorithms](../signature-specification.md#algorithm-selection).
-           3. Check that the [`targetArtifact` descriptor](../signature-specification.md#payload) in JWSPayload in `response.signatureEnvelope` matches `request.payload`. Plugins MAY append additional annotations but MUST NOT replace/override existing descriptor attributes and annotations.
-           4. Check that `response.signatureEnvelope` can be verified using the public key and signing algorithm specified in the signing certificate, which is embedded as part of certificate chain in `response.signatureEnvelope` . This step does not include certificate chain validation (certificate chain leads to a trusted root configure in Notation), or revocation check.
+           3. Check that the [`targetArtifact` descriptor](../signature-specification.md#payload) in payload of `response.signatureEnvelope` matches `request.payload`. Plugins MAY append additional annotations but MUST NOT replace/override existing descriptor attributes and annotations.
+           4. Check that `response.signatureEnvelope` can be verified using the public key and signing algorithm specified in the signing certificate, which is embedded as part of certificate chain in `response.signatureEnvelope`. This step does not include certificate chain validation (certificate chain leads to a trusted root configure in Notation), or revocation check.
            5. Check that the certificate chain in `response.signatureEnvelope` confirm to [Certificate Requirements].
         4. Generate a signature manifest for the given signature envelope, and append `response.annotations` to manifest annotations.
     2. Else if plugin supports capability `SIGNATURE_GENERATOR.RAW` *(covered in previous section)*
@@ -386,7 +389,7 @@ All request attributes are required.
 
 *pluginConfig* : Optional field for plugin configuration. For details, see [Plugin Configuration section](#plugin-configuration).
 
-*signatureEnvelopeType* - defines the type of signature envelope expected from the plugin. As  Notation clients need to be updated in order to parse and verify new signature formats, the default signature format can only be changed with new major version releases of Notation. Users however can opt into using an updated signature format supported by Notation, by passing an optional parameter.
+*signatureEnvelopeType* - defines the type of signature envelope expected from the plugin. As Notation clients need to be updated in order to parse and verify new signature formats, the default signature format can only be changed with new major version releases of Notation. Users however can opt into using an updated signature format supported by Notation, by passing an optional parameter.
 e.g. `notation sign $IMAGE --key {key-name} --signatureFormat {some-new-format}`
 
 *Response*
