@@ -222,30 +222,6 @@ The `keyUsage` extension MUST be present and MUST be marked critical. Bit positi
     - For RSA public key, the key length MUST be 2048 bits or higher.
     - For ECDSA public key, the key length MUST be 256 bits or higher.
 
-
-The CA certificates MUST meet the following requirements
-
-1. **[Basic Constraints:](https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9)**
-The `basicConstraints` extension MUST be present and MUST be marked as critical. The `cA` field MUST be set `true`.
-The [`pathLenConstraint`](https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9) field is OPTIONAL. If present, it MUST be verified against the depth of the chain below that CA certificate. (If value is null consider it as not present)
-1. **[Key Usage:](https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3)**
-The `keyUsage` extension MUST be present and MUST be marked critical. Bit positions for `keyCertSign` MUST be set.
-
-#### Leaf Certificates
-
-The leaf or end certificates MUST meet the following requirements
-
-1. **[Basic Constraints:](https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9)**
-The `basicConstraints` extension is OPTIONAL and can OPTIONALLY be marked as critical. If present, the `cA` field MUST be set to `false`.
-1. **[Key Usage:](https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3)**
-The `keyUsage` extension MUST be present and MUST be marked critical. Bit positions for `digitalSignature` MUST be set. The Bit positions for `keyCertSign` and `cRLSign` MUST NOT be set.
-1. **[Extended Key Usage:](https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.12)**  The `extendedKeyUsage` extension is OPTIONAL and can OPTIONALLY be marked as critical.
-    - **For codesigning certificate:** If present, the value MUST contain `id-kp-codeSigning` and MUST NOT contain `anyExtendedKeyUsage`, `serverAuth`, `emailProtection` and `timeStamping`.
-    - **For timestamping certificate:** If present, the value MUST contain `id-kp-timeStamping` and MUST NOT contain `anyExtendedKeyUsage`, `serverAuth`, `emailProtection` and `codeSigning`.
-1. **Key Length** The certificate MUST abide by the following key length restrictions:
-    - For RSA public key, the key length MUST be 2048 bits or higher.
-    - For ECDSA public key, the key length MUST be 256 bits or higher.
-
 #### Other requirements
 
 1. The certificates in the signature MUST be ordered list of X.509 certificate or certificate chain i.e. the certificate containing the public key used to digitally sign the payload must be the first certificate, followed by the intermediate and root certificates in the correct order. This also means
@@ -266,9 +242,9 @@ The client implementation can use the aforementioned `mediaType` to parse the si
 **Q: How will Notary v2 support multiple payload formats?**
 
 **A:** The Signature envelope MUST have a versioning mechanism to support multiple payload formats.
-[JWS JSON serialization](./signature-envelope-jose.md) signature envelope versioning is achieved by the `cty` field in ProtectedHeaders.
-[COSE_Sign1_Tagged](./signature-envelope-cose.md) signature envelope versioning is achieved by the `content type` (label: `3`) field in ProtectedHeaders.  
-For [JWS JSON serialization](./signature-envelope-jwt.md) signature envelope, versioning is achieved by the `cty` field in ProtectedHeaders.
+
+- For [JWS JSON serialization](./signature-envelope-jwt.md) signature envelope, versioning is achieved by the `cty` field in ProtectedHeaders.
+- For [COSE_Sign1_Tagged](./signature-envelope-cose.md) signature envelope, versioning is achieved by the `content type` (label: `3`) field in ProtectedHeaders.  
 
 ## Appendix
 
