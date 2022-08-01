@@ -199,19 +199,25 @@ This interface targets plugins that integrate with providers of basic cryptograp
 5. Execute the plugin with `get-plugin-metadata` command
     1. If plugin supports capability `SIGNATURE_GENERATOR.RAW`
         1. Execute the plugin with `describe-key` command, set `request.keyId` and the optional `request.pluginConfig` to corresponding values associated with signing key `keyName` in `config.json`.
-        2. Generate the payload to be signed for [JWS](../signature-specification.md#supported-signature-envelopes) envelope format.
-           1. Create the JWS protected headers collection and set `alg` to value corresponding to `describe-key.response.keySpec` as per [signature algorithm selection](../signature-specification.md#algorithm-selection).
-           2. Create the Notary v2 Payload (JWS Payload) as defined [here](../signature-specification.md#payload).
-           3. The *payload to sign* is then created as - `ASCII(BASE64URL(UTF8(ProtectedHeaders)) ‘.’ BASE64URL(JWSPayload))`
+        2. Generate the payload to be signed
+            * For [JWS](../signature-envelope-jws.md) envelope format
+                1. Create the JWS protected headers collection and set `alg` to value corresponding to `describe-key.response.keySpec` as per [signature algorithm selection](../signature-specification.md#algorithm-selection).
+                2. Create the Notary v2 Payload (JWS Payload) as defined [here](../signature-specification.md#payload).
+                3. The *payload to sign* is then created as - `ASCII(BASE64URL(UTF8(ProtectedHeaders)) ‘.’ BASE64URL(JWSPayload))`
+            * For [COSE](../signature-envelope-cose.md) envelope format
+                1. Create the COSE protected headers collection and set `alg` to value corresponding to `describe-key.response.keySpec` as per [signature algorithm selection](../signature-specification.md#algorithm-selection).
+                2. Create the Notary v2 Payload as defined [here](../signature-specification.md#payload).
+                3. The *payload to sign* is then created as the CBOR object [Sig_structure](../signature-envelope-cose.md#signature).
         3. Execute the plugin with `generate-signature` command.
            1. Set `request.keyId` and the optional `request.pluginConfig` to corresponding values associated with signing key `keyName` in `config.json`.
-           2. Set `request.payload` as base64 encoded *payload to sign* (the JWS *payload to sign* is double encoded, this is a shortcoming of using plugin contract with JSON encoding).
+           2. Set `request.payload` as base64 encoded *payload to sign*
+                * The JWS *payload to sign* is double encoded, this is a shortcoming of using plugin contract with JSON encoding.
            3. Set `keySpec` to value returned by `describe-key` command in `response.keySpec`, and `hashAlgorithm` to hash algorithm corresponding to the key spec, as per [signature algorithm selection](../signature-specification.md#algorithm-selection). The algorithm specified in `hashAlgorithm` MUST be used by the plugin to hash the payload (`request.payload`) as part of signature generation.
         4. Validate the generated signature, return an error if any of the checks fails.
            1. Check if `response.signingAlgorithm` is one of [supported signing algorithms](../signature-specification.md#algorithm-selection).
            2. Check that the plugin did not modify `request.payload` before generating the signature, and the signature is valid for the given payload. Verify the hash of the `request.payload` against `response.signature`, using the public key of signing certificate (leaf certificate) in `response.certificateChain` along with the `response.signingAlgorithm`. This step does not include certificate chain validation (certificate chain leads to a trusted root configured in Notation's Trust Store), or revocation check.
            3. Check that the `response.certificateChain` conforms to [Certificate Requirements](../signature-specification.md#certificate-requirements).
-        5. Assemble the JWS Signature envelope using `response.signature`, `response.signingAlgorithm` and `response.certificateChain`. Notation may also generate and include timestamp signature in this step.
+        5. Assemble the signature envelope using `response.signature`, `response.signingAlgorithm` and `response.certificateChain`. Notation may also generate and include timestamp signature in this step.
         6. Generate a signature manifest for the given signature envelope.
     2. Else if, plugin supports capability `SIGNATURE_GENERATOR.ENVELOPE` *(covered in next section)*
     3. Return an error
@@ -283,8 +289,7 @@ This command is used to generate the raw signature for a given payload.
   "hashAlgorithm" : "SHA_256" | "SHA_384" | "SHA_512",
 
   // Payload to sign, this is base64 encoded
-  "payload" : "<base64 encoded payload to be signed>",
-
+  "payload" : "<base64 encoded payload to be signed>"
 }
 ```
 
@@ -292,7 +297,7 @@ This command is used to generate the raw signature for a given payload.
 
 *pluginConfig* : Optional field for plugin configuration. For details, see [Plugin Configuration section](#plugin-configuration).
 
-*keySpec* : Required field that has one of following [supported key types](../signature-specification.md#algorithm-selection) - `RSA_2048`, `RSA_3072`, `RSA_4096`, `EC_256`, `EC_384`, `EC_512`. Specifies the key type and size for the key.
+*keySpec* : Required field that has one of following [supported key types](../signature-specification.md#algorithm-selection) - `RSA_2048`, `RSA_3072`, `RSA_4096`, `EC_256`, `EC_384`, `EC_521`. Specifies the key type and size for the key.
 
 *hashAlgorithm* : Required field that specifies Hash algorithm corresponding to the signature algorithm determined by `keySpec` for the key.
 
