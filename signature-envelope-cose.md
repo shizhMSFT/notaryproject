@@ -102,7 +102,7 @@ Notary v2 supports the following unprotected header parameters:
 - Label `33`: `x5chain`
 - `io.cncf.notary.signingAgent`
 
-```
+```yaml
 {
   / x5chain / 33: [
     << DER(leafCert) >>,
@@ -130,7 +130,7 @@ The process is described below:
 
 1. Encode the protected header into a CBOR object as a byte string named `body_protected`.
 2. Construct the `Sig_structure` for `COSE_Sign1`.
-    ```
+    ```yaml
     Sig_structure = [
         / context / 'Signature1',
         / body_protected / << ProtectedHeaders >>,
@@ -146,7 +146,7 @@ The process is described below:
 
 The final signature envelope is a `COSE_Sign1_Tagged` object, consisting of Payload, ProtectedHeaders, UnprotectedHeaders, and Signature.
 
-```
+```yaml
 18(
   [
     / protected / << {
